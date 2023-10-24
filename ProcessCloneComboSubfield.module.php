@@ -80,7 +80,6 @@ class ProcessCloneComboSubfield extends Process {
 					if($subfield && $create_subfields) {
 						$last_num = $settings->findMaxQty();
 						$export_data = $combo->getExportData();
-						bd($export_data, "export_data");
 						$qty = $export_data['qty'];
 						$order = $export_data['order'];
 						$prefix = "i{$subfield['num']}_";
