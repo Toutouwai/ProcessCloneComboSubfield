@@ -47,7 +47,7 @@ class ProcessCloneComboSubfield extends Process {
 			$f = $modules->get('InputfieldTextarea');
 			$f->name = 'newSubfields';
 			$f->label = $this->_('Names and labels of new subfields');
-			$f->description = $this->_('List the new subfields you want to create, one per line, in the format: name|label. Example: my_new_subfield|My new subfield');
+			$f->description = $this->_('List the new subfields you want to create, one per line, in the format: name=label. Example: my_new_subfield=My new subfield');
 			$f->required = true;
 			$form->add($f);
 
@@ -68,7 +68,7 @@ class ProcessCloneComboSubfield extends Process {
 					$lines = explode("\n", str_replace("\r", "", $input->post('newSubfields')));
 					$create_subfields = [];
 					foreach($lines as $line) {
-						$pieces = explode('|', $line);
+						$pieces = explode('=', $line);
 						// Must be two pieces in the line
 						if(count($pieces) !== 2) continue;
 						list($name, $label) = $pieces;
@@ -80,6 +80,9 @@ class ProcessCloneComboSubfield extends Process {
 					if($subfield && $create_subfields) {
 						$last_num = $settings->findMaxQty();
 						$export_data = $combo->getExportData();
+						bd($export_data, "export_data");
+						$qty = $export_data['qty'];
+						$order = $export_data['order'];
 						$prefix = "i{$subfield['num']}_";
 						$prefix_length = strlen($prefix);
 						$source_settings = [];
@@ -94,6 +97,8 @@ class ProcessCloneComboSubfield extends Process {
 						foreach($create_subfields as $name => $label) {
 							$num = $last_num + $i;
 							$new_prefix = "i{$num}_";
+							++$qty;
+							$order .= ",$num";
 							foreach($source_settings as $key => $value) {
 								if($key === 'name') $value = $name;
 								if($key === 'label') $value = $label;
@@ -101,6 +106,8 @@ class ProcessCloneComboSubfield extends Process {
 							}
 							++$i;
 						}
+						$import_data['qty'] = $qty;
+						$import_data['order'] = $order;
 
 						$combo->setImportData($import_data);
 						$combo->save();
